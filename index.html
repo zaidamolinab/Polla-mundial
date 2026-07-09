@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polla Mundial 2026</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { min-height:100vh; background:#0a0e1a; color:#f0f4ff; font-family:'Segoe UI',system-ui,sans-serif; }
+.header { background:linear-gradient(135deg,#0d1533,#1a2a6c,#0d1533); border-bottom:2px solid #f5c518; padding:20px 16px 16px; text-align:center; }
+.header-sub { font-size:11px; letter-spacing:4px; color:#f5c518; text-transform:uppercase; margin-bottom:4px; }
+.header h1 { font-size:28px; font-weight:900; color:#fff; margin-bottom:4px; }
+.header-pts { font-size:11px; color:#94a3b8; }
+.container { max-width:700px; margin:0 auto; padding:16px 12px 60px; }
+.tabs { display:flex; gap:8px; margin-bottom:20px; }
+.tab-btn { flex:1; padding:10px 0; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:13px; }
+.tab-btn.active { background:#f5c518; color:#000; }
+.tab-btn.inactive { background:#1a2540; color:#94a3b8; }
+.card { background:#111827; border-radius:12px; padding:16px; margin-bottom:12px; border:1px solid #1f2d45; }
+.card.locked { border-color:#1f4a2e; }
+.card.has-pred { border-color:#1a3a6c; }
+.label-sm { font-size:11px; color:#94a3b8; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; }
+.label-xs { font-size:11px; color:#94a3b8; letter-spacing:1px; margin-bottom:8px; }
+.player-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { padding:8px 16px; border-radius:20px; border:2px solid #1f2d45; background:transparent; color:#94a3b8; font-weight:700; font-size:13px; cursor:pointer; }
+.chip.authed { border-color:#4ade80; background:#14532d; color:#4ade80; }
+.chip.selecting { border-color:#f5c518; background:#f5c51822; color:#f5c518; }
+.pin-box { margin-top:16px; padding:16px; background:#0a0e1a; border-radius:10px; border:1px solid #f5c51844; }
+.pin-title { font-size:13px; color:#f5c518; font-weight:700; margin-bottom:12px; }
+.pin-row { display:flex; gap:8px; align-items:center; }
+.pin-input { flex:1; padding:12px; border-radius:8px; border:1px solid #1f2d45; background:#111827; color:#fff; font-size:22px; letter-spacing:8px; outline:none; text-align:center; }
+.pin-eye { padding:12px; border-radius:8px; border:1px solid #1f2d45; background:#111827; color:#94a3b8; cursor:pointer; font-size:16px; }
+.btn-gold { padding:12px 18px; border-radius:8px; border:none; background:#f5c518; color:#000; font-weight:700; font-size:13px; cursor:pointer; }
+.btn-dim { padding:12px 18px; border-radius:8px; border:none; background:#1f2d45; color:#64748b; font-size:13px; cursor:not-allowed; }
+.pin-error { margin-top:8px; font-size:12px; color:#ef4444; display:none; }
+.pin-cancel { margin-top:10px; background:none; border:none; color:#64748b; font-size:12px; cursor:pointer; }
+.section-title { font-size:11px; font-weight:700; letter-spacing:3px; color:#f5c518; text-transform:uppercase; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #1f2d45; }
+.match-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.match-label { font-weight:700; font-size:15px; color:#fff; }
+.match-time { font-size:11px; color:#64748b; margin-top:2px; }
+.badge { font-size:10px; font-weight:700; padding:4px 10px; border-radius:20px; white-space:nowrap; }
+.badge.locked { background:#1f4a2e; color:#4ade80; }
+.badge.closing { background:#2a1f00; color:#f5c518; }
+.badge.open { background:#1a2540; color:#64748b; }
+.team-btns { display:flex; gap:8px; margin-top:8px; }
+.team-btn { flex:1; padding:10px 8px; border-radius:8px; border:2px solid #1f2d45; background:#0a0e1a; color:#64748b; font-weight:700; font-size:13px; cursor:pointer; }
+.team-btn.loc { border-color:#4ade80; background:#14532d; color:#fff; }
+.team-btn.vis { border-color:#60a5fa; background:#1e3a5f; color:#fff; }
+.team-btn:disabled { cursor:not-allowed; opacity:0.5; }
+.score-input { width:100%; padding:10px 14px; border-radius:8px; border:1px solid #1f2d45; background:#0f172a; color:#fff; font-size:14px; outline:none; margin-top:8px; }
+.score-input.filled { border-color:#f5c518; }
+.score-input:disabled { background:#0a0e1a; cursor:not-allowed; }
+.tipo-btns { display:flex; gap:8px; margin-top:8px; }
+.tipo-btn { flex:1; padding:9px 4px; border-radius:8px; border:2px solid #1f2d45; background:#0a0e1a; color:#64748b; font-weight:700; font-size:12px; cursor:pointer; }
+.tipo-btn:disabled { cursor:not-allowed; opacity:0.5; }
+.pred-summary { margin-top:12px; padding:8px 12px; background:#0a0e1a; border-radius:6px; font-size:12px; color:#94a3b8; }
+.tbd { color:#64748b; font-size:13px; text-align:center; padding:8px 0; }
+.empty { text-align:center; color:#64748b; padding:40px 0; font-size:15px; }
+.warn { font-size:12px; color:#f5c518; padding:8px 12px; background:#2a1f00; border-radius:6px; }
+.status { font-size:11px; color:#64748b; margin-top:6px; min-height:16px; }
+.status.ok { color:#4ade80; }
+.status.err { color:#f87171; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; padding:4px 8px; font-weight:600; color:#64748b; }
+td { padding:8px; border-top:1px solid #1f2d45; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-sub">⚽ Copa del Mundo 2026</div>
+  <h1>POLLA MUNDIAL</h1>
+  <div class="header-pts">3 pts ganador · +2 pts marcador exacto · +2 pts resultado</div>
+</div>
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('predecir')">🎯 Predecir</button>
+    <button class="tab-btn inactive" onclick="switchTab('resumen')">📊 Resumen</button>
+  </div>
+
+  <div id="panel-predecir">
+    <div class="card">
+      <div class="label-sm" id="login-title">¿Quién eres?</div>
+      <div class="player-chips" id="chips"></div>
+      <div id="pinbox" class="pin-box" style="display:none">
+        <div class="pin-title" id="pin-title">🔐 PIN</div>
+        <div class="pin-row">
+          <input class="pin-input" id="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+          <button class="pin-eye" onclick="togglePin()">👁</button>
+          <button class="btn-dim" id="pin-btn" onclick="submitPin()">Entrar</button>
+        </div>
+        <div class="pin-error" id="pin-err">❌ PIN incorrecto</div>
+        <button class="pin-cancel" onclick="cancelPin()">Cancelar</button>
+      </div>
+      <div style="font-size:11px;color:#64748b;margin-top:6px;display:none" id="logout-hint">Toca tu nombre para cerrar sesión</div>
+      <div class="status" id="sync-status"></div>
+    </div>
+    <div class="empty" id="no-msg">👆 Selecciona tu apodo e ingresa tu PIN</div>
+    <div id="rounds" style="display:none"></div>
+  </div>
+
+  <div id="panel-resumen" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="section-title" style="margin:0;border:none;padding:0">Predicciones de todos</div>
+      <button onclick="syncCloud(true)" style="background:#1a2540;border:1px solid #1f2d45;color:#94a3b8;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer">🔄 Actualizar</button>
+    </div>
+    <div class="status" id="resumen-status"></div>
+    <div id="resumen" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<script>
+const PLAYERS = ["joaco","Pipo","tito","Vicho","Zaida","Rotrti","Orasio"];
+const PINS = {joaco:"1556",Pipo:"3914",tito:"3981",Vicho:"2366",Zaida:"7424",Rotrti:"3850",Orasio:"7595"};
+const BIN = "https://api.jsonbin.io/v3/b/6a4f214af5f4af5e297571f3";
+const KEY = "$2a$10$PF5AB22yMuWQDgUvBNLOk.UGN3BGpjDxCq96u7oWpNAl7FZSAZvS2";
+const LKEY = "polla26";
+const CHILE = -4;
+
+const ROUNDS = [
+  {name:"Cuartos de Final",matches:[
+    {id:"q1",label:"Francia vs. Marruecos",local:"Francia",vis:"Marruecos",ko:"2026-07-09T19:00:00Z"},
+    {id:"q2",label:"España vs. Bélgica",local:"España",vis:"Bélgica",ko:"2026-07-10T19:00:00Z"},
+    {id:"q3",label:"Noruega vs. Inglaterra",local:"Noruega",vis:"Inglaterra",ko:"2026-07-11T21:00:00Z"},
+    {id:"q4",label:"Argentina vs. Suiza",local:"Argentina",vis:"Suiza",ko:"2026-07-12T01:00:00Z"},
+  ]},
+  {name:"Semifinales",matches:[
+    {id:"s1",label:"Semifinal 1",local:"TBD",vis:"TBD",ko:"2026-07-14T19:00:00Z"},
+    {id:"s2",label:"Semifinal 2",local:"TBD",vis:"TBD",ko:"2026-07-15T19:00:00Z"},
+  ]},
+  {name:"Tercer Lugar",matches:[
+    {id:"t1",label:"Tercer Lugar",local:"TBD",vis:"TBD",ko:"2026-07-18T21:00:00Z"},
+  ]},
+  {name:"Final",matches:[
+    {id:"f1",label:"Final",local:"TBD",vis:"TBD",ko:"2026-07-19T19:00:00Z"},
+  ]},
+];
+
+// State
+let data = {};
+let player = null;
+let selecting = null;
+let pinVis = false;
+let saveTimer = null;
+
+// Load local immediately
+try { data = JSON.parse(localStorage.getItem(LKEY)||"{}"); } catch {}
+
+function saveLocal() { try { localStorage.setItem(LKEY, JSON.stringify(data)); } catch {} }
+
+// Cloud sync
+async function syncCloud(show=false) {
+  if (show) setStatus("resumen-status","⏳ Actualizando...","");
+  try {
+    const r = await fetch(BIN+"/latest", {
+      headers:{"X-Master-Key":KEY,"X-Bin-Meta":"false"},
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    const fresh = j.record || j;
+    // Merge: keep local player's data, take cloud for others
+    if (player) {
+      Object.keys(fresh).forEach(k => {
+        if (!k.startsWith(player+"::")) data[k] = fresh[k];
+      });
+    } else {
+      data = {...data, ...fresh};
+    }
+    saveLocal();
+    if (show) setStatus("resumen-status","✅ Actualizado — "+new Date().toLocaleTimeString("es-CL"),"ok");
+  } catch {
+    if (show) setStatus("resumen-status","⚠️ Sin conexión — datos pueden no estar al día","err");
+  }
+  renderResumen();
+}
+
+async function pushCloud() {
+  setStatus("sync-status","💾 Guardando...","");
+  try {
+    const r = await fetch(BIN, {
+      method:"PUT",
+      headers:{"Content-Type":"application/json","X-Master-Key":KEY},
+      body:JSON.stringify(data)
+    });
+    if (!r.ok) throw 0;
+    setStatus("sync-status","✅ Guardado","ok");
+    setTimeout(()=>setStatus("sync-status","",""),3000);
+  } catch {
+    setStatus("sync-status","⚠️ Sin internet — guardado localmente","err");
+  }
+}
+
+function setStatus(id, msg, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = "status"+(cls?" "+cls:"");
+}
+
+function get(mid, field) {
+  if (!player) return "";
+  return (data[player+"::"+mid]||{})[field]||"";
+}
+function set(mid, field, val) {
+  if (!player) return;
+  const k = player+"::"+mid;
+  data[k] = {...(data[k]||{}), [field]:val};
+  saveLocal();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(pushCloud, 2000);
+}
+
+function isLocked(ko) { return Date.now() >= new Date(ko).getTime()-15*60*1000; }
+function lockIn(ko) {
+  const d = new Date(ko).getTime()-15*60*1000-Date.now();
+  if (d<=0) return null;
+  const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);
+  return h>0?`Cierra en ${h}h ${m}m`:`Cierra en ${m}m`;
+}
+function fmt(ko) {
+  const d = new Date(new Date(ko).getTime()+CHILE*3600000);
+  return d.toLocaleString("es-CL",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC"})+" (Chile)";
+}
+
+// ── AUTH ──
+function renderChips() {
+  const c = document.getElementById("chips");
+  if (!c) return;
+  c.innerHTML = "";
+  PLAYERS.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "chip"+(player===p?" authed":selecting===p?" selecting":"");
+    b.textContent = (player===p?"✓ ":"")+p;
+    b.onclick = () => pickPlayer(p);
+    c.appendChild(b);
+  });
+  document.getElementById("login-title").textContent = player?"Sesión iniciada como":"¿Quién eres?";
+  document.getElementById("logout-hint").style.display = player?"block":"none";
+}
+
+function pickPlayer(p) {
+  if (player===p) { logout(); return; }
+  if (player) return;
+  selecting = p;
+  renderChips();
+  const pb = document.getElementById("pinbox");
+  pb.style.display = "block";
+  document.getElementById("pin-title").textContent = "🔐 PIN — "+p;
+  document.getElementById("pin-input").value = "";
+  document.getElementById("pin-input").type = "password";
+  document.getElementById("pin-err").style.display = "none";
+  document.getElementById("pin-btn").className = "btn-dim";
+  pinVis = false;
+  setTimeout(()=>document.getElementById("pin-input").focus(),100);
+}
+
+function logout() {
+  player = null; selecting = null;
+  document.getElementById("pinbox").style.display = "none";
+  setStatus("sync-status","","");
+  renderChips();
+  document.getElementById("no-msg").style.display = "block";
+  document.getElementById("rounds").style.display = "none";
+}
+
+function togglePin() {
+  pinVis = !pinVis;
+  document.getElementById("pin-input").type = pinVis?"text":"password";
+}
+
+document.addEventListener("input", e => {
+  if (e.target.id !== "pin-input") return;
+  const v = e.target.value.replace(/\D/g,"");
+  e.target.value = v;
+  document.getElementById("pin-err").style.display = "none";
+  document.getElementById("pin-btn").className = v.length===4?"btn-gold":"btn-dim";
+});
+
+document.addEventListener("keydown", e => {
+  if (e.target.id === "pin-input" && e.key === "Enter") submitPin();
+});
+
+function submitPin() {
+  const v = document.getElementById("pin-input").value;
+  if (v.length!==4) return;
+  if (v===PINS[selecting]) {
+    player = selecting; selecting = null;
+    document.getElementById("pinbox").style.display = "none";
+    renderChips();
+    document.getElementById("no-msg").style.display = "none";
+    document.getElementById("rounds").style.display = "block";
+    renderRounds();
+    // Sync after login
+    syncCloud(false);
+  } else {
+    document.getElementById("pin-input").value = "";
+    document.getElementById("pin-err").style.display = "block";
+    document.getElementById("pin-btn").className = "btn-dim";
+  }
+}
+
+function cancelPin() {
+  selecting = null;
+  document.getElementById("pinbox").style.display = "none";
+  renderChips();
+}
+
+// ── PREDECIR ──
+function renderRounds() {
+  const c = document.getElementById("rounds");
+  if (!c) return;
+  c.innerHTML = "";
+  ROUNDS.forEach(r => {
+    const s = document.createElement("div");
+    s.style.marginBottom = "24px";
+    const t = document.createElement("div");
+    t.className = "section-title";
+    t.textContent = r.name;
+    s.appendChild(t);
+    r.matches.forEach(m => s.appendChild(makeCard(m)));
+    c.appendChild(s);
+  });
+}
+
+function makeCard(m) {
+  const locked = isLocked(m.ko);
+  const tl = lockIn(m.ko);
+  const isTBD = m.local==="TBD";
+  const gan = get(m.id,"ganador");
+  const mar = get(m.id,"marcador");
+  const tip = get(m.id,"tipo");
+
+  const card = document.createElement("div");
+  card.className = "card"+(locked?" locked":gan?" has-pred":"");
+  card.style.marginBottom = "12px";
+  if (isTBD) card.style.opacity = "0.5";
+
+  card.innerHTML = `<div class="match-header">
+    <div><div class="match-label">${m.label}</div><div class="match-time">${fmt(m.ko)}</div></div>
+    <div class="badge ${locked?"locked":tl?"closing":"open"}">${locked?"🔒 Cerrado":tl||"Abierto"}</div>
+  </div>`;
+
+  if (isTBD) { card.innerHTML += `<div class="tbd">Equipos por definir</div>`; return card; }
+
+  // Ganador
+  card.innerHTML += `<div class="label-xs" style="margin-top:4px">PASA LA LLAVE</div>`;
+  const tr = document.createElement("div");
+  tr.className = "team-btns";
+  [{t:m.local,c:"loc"},{t:m.vis,c:"vis"}].forEach(({t,c}) => {
+    const b = document.createElement("button");
+    b.className = "team-btn"+(gan===t?" "+c:"");
+    b.textContent = (c==="loc"?"🏠 ":"✈️ ")+t;
+    b.disabled = locked;
+    b.onclick = () => { set(m.id,"ganador",t); renderRounds(); };
+    tr.appendChild(b);
+  });
+  card.appendChild(tr);
+
+  // Marcador
+  card.innerHTML += `<div class="label-xs" style="margin-top:12px">MARCADOR EXACTO <span style="color:#64748b">(+2 pts)</span></div>`;
+  const inp = document.createElement("input");
+  inp.className = "score-input"+(mar?" filled":"");
+  inp.type="text"; inp.placeholder="ej: 2-1"; inp.value=mar; inp.disabled=locked;
+  inp.oninput = () => { set(m.id,"marcador",inp.value); inp.className="score-input"+(inp.value?" filled":""); };
+  card.appendChild(inp);
+
+  // Tipo
+  card.innerHTML += `<div class="label-xs" style="margin-top:12px">¿CÓMO TERMINA? <span style="color:#64748b">(+2 pts)</span></div>`;
+  const tipRow = document.createElement("div");
+  tipRow.className = "tipo-btns";
+  [{v:"normal",l:"⏱ Normal",col:"#4ade80",bg:"#14532d"},
+   {v:"alargue",l:"⏰ Alargue",col:"#f59e0b",bg:"#451a03"},
+   {v:"penales",l:"🎯 Penales",col:"#f87171",bg:"#450a0a"}].forEach(o => {
+    const b = document.createElement("button");
+    b.className = "tipo-btn";
+    b.textContent = o.l;
+    b.disabled = locked;
+    if (tip===o.v) { b.style.borderColor=o.col; b.style.background=o.bg; b.style.color=o.col; }
+    b.onclick = () => { set(m.id,"tipo",tip===o.v?"":o.v); renderRounds(); };
+    tipRow.appendChild(b);
+  });
+  card.appendChild(tipRow);
+
+  if (gan) {
+    const s = document.createElement("div");
+    s.className = "pred-summary";
+    let h = `Tu predicción: <span style="color:#f5c518;font-weight:700">${gan}</span>`;
+    if (mar) h += ` · <span style="color:#60a5fa">${mar}</span>`;
+    if (tip) {
+      const col=tip==="normal"?"#4ade80":tip==="alargue"?"#f59e0b":"#f87171";
+      const lbl=tip==="normal"?"Tiempo normal":tip==="alargue"?"Alargue":"Penales";
+      h += ` · <span style="color:${col}">${lbl}</span>`;
+    }
+    s.innerHTML = h;
+    card.appendChild(s);
+  }
+  return card;
+}
+
+// ── RESUMEN ──
+function renderResumen() {
+  const c = document.getElementById("resumen");
+  if (!c) return;
+  c.innerHTML = "";
+  const all = ROUNDS.flatMap(r=>r.matches).filter(m=>m.local!=="TBD");
+  let any = false;
+  all.forEach(m => {
+    const has = PLAYERS.some(p=>(data[p+"::"+m.id]||{}).ganador);
+    if (!has) return;
+    any = true;
+    const locked = isLocked(m.ko);
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<div style="font-weight:700;color:#fff;margin-bottom:4px">${m.label}</div>
+      <div style="font-size:11px;color:#64748b;margin-bottom:12px">${fmt(m.ko)}</div>`;
+    if (!locked) {
+      card.innerHTML += `<div class="warn">🔒 Las predicciones se revelan cuando cierre el partido</div>`;
+    } else {
+      const tbl = document.createElement("table");
+      tbl.innerHTML = `<thead><tr><th>Jugador</th><th>Ganador</th><th>Marcador</th><th>Resultado</th></tr></thead>`;
+      const tb = document.createElement("tbody");
+      PLAYERS.forEach(p => {
+        const pr = data[p+"::"+m.id]||{};
+        const tc=pr.tipo==="normal"?"#4ade80":pr.tipo==="alargue"?"#f59e0b":pr.tipo==="penales"?"#f87171":"#374151";
+        const tl=pr.tipo==="normal"?"⏱ Normal":pr.tipo==="alargue"?"⏰ Alargue":pr.tipo==="penales"?"🎯 Penales":"—";
+        const gc=pr.ganador===m.local?"#4ade80":"#60a5fa";
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td style="font-weight:700;color:#fff">${p}</td>
+          <td style="color:${pr.ganador?gc:"#374151"}">${pr.ganador||"—"}</td>
+          <td style="color:#94a3b8">${pr.marcador||"—"}</td>
+          <td style="color:${tc};font-size:12px">${tl}</td>`;
+        tb.appendChild(tr);
+      });
+      tbl.appendChild(tb);
+      card.appendChild(tbl);
+    }
+    c.appendChild(card);
+  });
+  if (!any) c.innerHTML = `<div class="empty">Aún no hay predicciones guardadas.</div>`;
+}
+
+function switchTab(tab) {
+  document.getElementById("panel-predecir").style.display = tab==="predecir"?"block":"none";
+  document.getElementById("panel-resumen").style.display = tab==="resumen"?"block":"none";
+  document.querySelectorAll(".tab-btn").forEach((b,i)=>{
+    b.className = "tab-btn "+((i===0&&tab==="predecir")||(i===1&&tab==="resumen")?"active":"inactive");
+  });
+  if (tab==="resumen") syncCloud(true);
+}
+
+// ── INIT ──
+renderChips();
+// Sync cloud in background after 1s — never blocks UI
+setTimeout(()=>syncCloud(false), 1000);
+setInterval(()=>{ if(player) renderRounds(); }, 30000);
+</script>
+</body>
+</html>
