@@ -343,7 +343,12 @@ function makeCard(m) {
   if (isTBD) { card.innerHTML += `<div class="tbd">Equipos por definir</div>`; return card; }
 
   // Ganador
-  card.innerHTML += `<div class="label-xs" style="margin-top:4px">PASA LA LLAVE</div>`;
+  const ganLabel = document.createElement("div");
+  ganLabel.className = "label-xs";
+  ganLabel.style.marginTop = "4px";
+  ganLabel.textContent = "PASA LA LLAVE";
+  card.appendChild(ganLabel);
+
   const tr = document.createElement("div");
   tr.className = "team-btns";
   [{t:m.local,c:"loc"},{t:m.vis,c:"vis"}].forEach(({t,c}) => {
@@ -357,7 +362,12 @@ function makeCard(m) {
   card.appendChild(tr);
 
   // Marcador
-  card.innerHTML += `<div class="label-xs" style="margin-top:12px">MARCADOR EXACTO <span style="color:#64748b">(+2 pts)</span></div>`;
+  const marLabel = document.createElement("div");
+  marLabel.className = "label-xs";
+  marLabel.style.marginTop = "12px";
+  marLabel.innerHTML = `MARCADOR EXACTO <span style="color:#64748b">(+2 pts)</span>`;
+  card.appendChild(marLabel);
+
   const inp = document.createElement("input");
   inp.className = "score-input"+(mar?" filled":"");
   inp.type="text"; inp.placeholder="ej: 2-1"; inp.value=mar; inp.disabled=locked;
@@ -365,7 +375,12 @@ function makeCard(m) {
   card.appendChild(inp);
 
   // Tipo
-  card.innerHTML += `<div class="label-xs" style="margin-top:12px">¿CÓMO TERMINA? <span style="color:#64748b">(+2 pts)</span></div>`;
+  const tipLabel = document.createElement("div");
+  tipLabel.className = "label-xs";
+  tipLabel.style.marginTop = "12px";
+  tipLabel.innerHTML = `¿CÓMO TERMINA? <span style="color:#64748b">(+2 pts)</span>`;
+  card.appendChild(tipLabel);
+
   const tipRow = document.createElement("div");
   tipRow.className = "tipo-btns";
   [{v:"normal",l:"⏱ Normal",col:"#4ade80",bg:"#14532d"},
@@ -449,10 +464,12 @@ function switchTab(tab) {
 }
 
 // ── INIT ──
-renderChips();
-// Sync cloud in background after 1s — never blocks UI
-setTimeout(()=>syncCloud(false), 1000);
-setInterval(()=>{ if(player) renderRounds(); }, 30000);
+document.addEventListener("DOMContentLoaded", function() {
+  renderChips();
+  // Sync cloud in background after 1s — never blocks UI
+  setTimeout(()=>syncCloud(false), 1000);
+  setInterval(()=>{ if(player) renderRounds(); }, 30000);
+});
 </script>
 </body>
 </html>
